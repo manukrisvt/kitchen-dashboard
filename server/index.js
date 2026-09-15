@@ -4,6 +4,7 @@ import { fileURLToPath } from 'node:url';
 import { getEvents } from './events.js';
 import { getWeather } from './weather.js';
 import choresDb from './chores.js';
+import { getPhotoList, photoPath } from './photos.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const app = express();
@@ -83,6 +84,17 @@ app.get('/api/weather', async (req, res) => {
     console.error('weather error:', err);
     res.status(502).json({ error: 'Failed to fetch weather', detail: err.message });
   }
+});
+
+// ---------- Photos ----------
+app.get('/api/photos', (req, res) => {
+  res.json(getPhotoList());
+});
+
+app.get('/api/photos/:filename', (req, res) => {
+  const filePath = photoPath(req.params.filename);
+  if (!filePath) return res.status(404).json({ error: 'Not found' });
+  res.sendFile(filePath);
 });
 
 // Serve the built React app for all other routes

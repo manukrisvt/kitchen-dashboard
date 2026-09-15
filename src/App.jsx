@@ -312,6 +312,71 @@ function Next7Column({ events, weather, weatherError, weatherUpdatedAt, chores, 
   );
 }
 
+// ---- Photo background: cross-fades through family photos with a dark overlay ----
+const PHOTO_ROTATE_MS = 5 * 60 * 1000; // new photo every 5 minutes
+
+function usePhotoBackground() {
+  const [photo, setPhoto] = useState(null);
+  const [next, setNext] = useState(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    let photos = [];
+    let idx = 0;
+
+    const pick = () => {
+      if (photos.length === 0) return null;
+      idx = (idx + 1 + Math.floor(Math.random() * (photos.length - 1))) % photos.length;
+      return photos[idx];
+    };
+
+    const load = async () => {
+      try {
+        const res = await fetch('/api/photos');
+        if (!res.ok) return;
+        const json = await res.json();
+        if (cancelled || !json.photos?.length) return;
+        photos = json.photos;
+        setPhoto((cur) => cur ?? pick());
+      } catch { /* no photos — plain background is fine */ }
+    };
+
+    load();
+    const rotateId = setInterval(() => {
+      const p = pick();
+      if (p && !cancelled) {
+        // Preload, then swap so the fade is seamless
+        const img = new Image();
+        img.onload = () => !cancelled && setPhoto(p);
+        img.src = p;
+      }
+    }, PHOTO_ROTATE_MS);
+    return () => {
+      cancelled = true;
+      clearInterval(rotateId);
+    };
+  }, []);
+
+  return photo;
+}
+
+function PhotoBackground({ photo }) {
+  return (
+    <div className="absolute inset-0 overflow-hidden" aria-hidden="true">
+      {photo && (
+        <img
+          src={photo}
+          alt=""
+          className="absolute inset-0 w-full h-full object-cover transition-opacity duration-[3000ms] opacity-100"
+        />
+      )}
+      {/* Dark overlay keeps all text readable over any photo */}
+      <div className="absolute inset-0 bg-ink-950/80" />
+      <div className="absolute inset-0 bg-gradient-to-b from-ink-950/60 via-transparent to-ink-950/60" />
+    </div>
+  );
+}
+
 export default function App() {
   const now = useClock();
   const events = usePolling('/api/events', EVENTS_POLL_MS);
@@ -319,6 +384,7 @@ export default function App() {
   const chores = usePolling('/api/chores', EVENTS_POLL_MS);
   useWakeLock();
   const offset = useBurnInShift();
+  const photo = usePhotoBackground();
 
   const handleChoreDone = async (id) => {
     // Optimistic: remove locally, then fire request; refetch on failure
@@ -331,9 +397,10 @@ export default function App() {
   };
 
   return (
-    <div className="h-full w-full bg-ink-950">
+    <div className="relative h-full w-full bg-ink-950">
+      <PhotoBackground photo={photo} />
       <div
-        className="burnin-shift h-full w-full flex flex-col"
+        className="relative burnin-shift h-full w-full flex flex-col"
         style={{ transform: `translate(${offset.x}px, ${offset.y}px)` }}
       >
         <TopStrip now={now} weather={weather.data} weatherError={weather.error} />

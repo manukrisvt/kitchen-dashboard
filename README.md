@@ -79,6 +79,22 @@ npm run dev            # Vite dev server on :5173, proxies /api to :3000
 - The layout shifts a few pixels every 15 minutes to reduce burn-in on an
   always-on display
 
+## Photo background
+
+The dashboard rotates through family photos as its background (cross-fade every
+5 minutes, dark overlay keeps text readable).
+
+- **Local:** drop photos into `public/photos/` (jpg/jpeg/png/webp)
+- **Deployed:** photos are served from the repo — commit them and push:
+  ```bash
+  ./scripts/sync-photos.sh ~/Pictures/KitchenDashboard   # copy from a folder
+  git add public/photos && git commit -m "photos" && git push
+  ```
+- To pull from Apple Photos: create an album, select all, **File → Export**,
+  export to a folder, then run the sync script. (Apple doesn't allow web apps
+  to read the Photos library directly.)
+- No photos? The dashboard uses the plain dark background — everything still works.
+
 ## API
 
 | Route | Description |
