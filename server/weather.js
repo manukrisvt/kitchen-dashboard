@@ -1,6 +1,6 @@
-// Open-Meteo proxy — free, no API key. Charlotte, NC area (35.08, -80.67)
-const LAT = 35.08;
-const LON = -80.67;
+// Open-Meteo proxy — free, no API key. Indian Trail, NC (1311 Tollcross Rd area)
+const LAT = 35.0724;
+const LON = -80.6206;
 const URL = `https://api.open-meteo.com/v1/forecast?latitude=${LAT}&longitude=${LON}&current=temperature_2m,weather_code&daily=temperature_2m_max,temperature_2m_min&temperature_unit=fahrenheit&timezone=auto&forecast_days=4`;
 
 const CACHE_TTL = 15 * 60 * 1000; // 15 minutes
