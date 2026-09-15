@@ -1,5 +1,5 @@
 # ---- Build the React frontend ----
-FROM node:20-alpine AS build
+FROM node:22-alpine AS build
 WORKDIR /app
 COPY package*.json ./
 RUN npm ci
@@ -7,8 +7,10 @@ COPY . .
 RUN npm run build
 
 # ---- Serve API + static files ----
-FROM node:20-alpine
+FROM node:22-alpine
 WORKDIR /app
+# better-sqlite3 compiles natively — needs python3/make/g++ at install time
+RUN apk add --no-cache python3 make g++
 ENV NODE_ENV=production
 COPY package*.json ./
 RUN npm ci --omit=dev
