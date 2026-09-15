@@ -32,6 +32,7 @@ function addDays(dateKey, n) {
 }
 
 // ---- Data-fetching hook: keeps last-known data on error, tracks staleness ----
+// Fast retry (60s) while a source has never loaded; normal interval once it has.
 function usePolling(url, intervalMs) {
   const [data, setData] = useState(null);
   const [error, setError] = useState(false);
@@ -52,9 +53,9 @@ function usePolling(url, intervalMs) {
 
   useEffect(() => {
     fetchNow();
-    const id = setInterval(fetchNow, intervalMs);
+    const id = setInterval(fetchNow, data ? intervalMs : 60 * 1000);
     return () => clearInterval(id);
-  }, [fetchNow, intervalMs]);
+  }, [fetchNow, intervalMs, data]);
 
   return { data, error, updatedAt, refetch: fetchNow };
 }
