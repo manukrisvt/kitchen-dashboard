@@ -336,7 +336,7 @@ function usePhotoBackground() {
         if (!res.ok) return;
         const json = await res.json();
         if (cancelled || !json.photos?.length) return;
-        photos = json.photos;
+        photos = json.photos.map((p) => p.url);
         setPhoto((cur) => cur ?? pick());
       } catch { /* no photos — plain background is fine */ }
     };

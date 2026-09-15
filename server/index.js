@@ -4,7 +4,7 @@ import { fileURLToPath } from 'node:url';
 import { getEvents } from './events.js';
 import { getWeather } from './weather.js';
 import choresDb from './chores.js';
-import { getPhotoList, photoPath } from './photos.js';
+import photosDb, { isAllowedPhoto, maxPhotoBytes } from './photos.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const app = express();
@@ -87,19 +87,40 @@ app.get('/api/weather', async (req, res) => {
 });
 
 // ---------- Photos ----------
-app.get('/api/photos', (req, res) => {
-  res.json(getPhotoList());
+app.get('/api/photos', async (req, res) => {
+  const rows = await photosDb.list();
+  res.json({ photos: rows.map((r) => ({ id: r.id, filename: r.filename, size: r.size, url: `/api/photos/${r.id}` })) });
 });
 
-app.get('/api/photos/:filename', (req, res) => {
-  const filePath = photoPath(req.params.filename);
-  if (!filePath) return res.status(404).json({ error: 'Not found' });
-  res.sendFile(filePath);
+app.get('/api/photos/:id(\\d+)', async (req, res) => {
+  const photo = await photosDb.get(req.params.id);
+  if (!photo) return res.status(404).json({ error: 'Not found' });
+  res.setHeader('Content-Type', photo.mime);
+  res.setHeader('Cache-Control', 'public, max-age=86400');
+  res.send(photo.data);
+});
+
+app.post('/api/photos', express.raw({ type: 'image/*', limit: maxPhotoBytes() }), async (req, res) => {
+  if (!req.body || !req.body.length) return res.status(400).json({ error: 'No image data' });
+  const filename = req.query.filename ? String(req.query.filename) : 'photo';
+  if (!isAllowedPhoto(filename)) return res.status(400).json({ error: 'Only jpg/jpeg/png/webp allowed' });
+  const mime = req.headers['content-type'] || 'image/jpeg';
+  const id = await photosDb.insert(filename, mime, req.body.length, req.body);
+  res.status(201).json({ id, filename, size: req.body.length });
+});
+
+app.delete('/api/photos/:id(\\d+)', async (req, res) => {
+  const ok = await photosDb.remove(req.params.id);
+  if (!ok) return res.status(404).json({ error: 'Not found' });
+  res.json({ ok: true });
 });
 
 // Serve the built React app for all other routes
 const dist = path.join(__dirname, '..', 'dist');
 app.use(express.static(dist));
+app.get('/upload', (req, res) => {
+  res.sendFile(path.join(dist, 'upload.html'));
+});
 app.get('*', (req, res) => {
   res.sendFile(path.join(dist, 'index.html'));
 });

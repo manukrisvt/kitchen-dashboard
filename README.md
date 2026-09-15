@@ -82,18 +82,18 @@ npm run dev            # Vite dev server on :5173, proxies /api to :3000
 ## Photo background
 
 The dashboard rotates through family photos as its background (cross-fade every
-5 minutes, dark overlay keeps text readable).
+5 minutes, dark overlay keeps text readable). Photos are stored in the database
+(Postgres on Railway, SQLite locally) — no repo bloat, no rebuild needed.
 
-- **Local:** drop photos into `public/photos/` (jpg/jpeg/png/webp)
-- **Deployed:** photos are served from the repo — commit them and push:
-  ```bash
-  ./scripts/sync-photos.sh ~/Pictures/KitchenDashboard   # copy from a folder
-  git add public/photos && git commit -m "photos" && git push
-  ```
-- To pull from Apple Photos: create an album, select all, **File → Export**,
-  export to a folder, then run the sync script. (Apple doesn't allow web apps
-  to read the Photos library directly.)
-- No photos? The dashboard uses the plain dark background — everything still works.
+**To add/manage photos:** open `/upload` on the deployed app (e.g.
+`https://your-app.up.railway.app/upload`) — drag & drop or click to upload
+(jpg/png/webp, up to 8MB each), and delete existing ones from the grid.
+
+To pull from Apple Photos: create an album, select all, **File → Export**,
+then upload the exported files at `/upload`. (Apple doesn't allow web apps to
+read the Photos library directly.)
+
+No photos? The dashboard uses the plain dark background — everything still works.
 
 ## API
 

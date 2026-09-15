@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Photo Upload — Kitchen Dashboard</title>
+<style>
+  body { font-family: -apple-system, sans-serif; background: #0a0e14; color: #f1f5f9; margin: 0; padding: 40px; }
+  h1 { font-size: 1.6rem; } h2 { font-size: 1.1rem; color: #94a3b8; margin-top: 2rem; }
+  .drop { border: 2px dashed #2a3444; border-radius: 16px; padding: 48px; text-align: center; color: #94a3b8; cursor: pointer; transition: border-color .2s; }
+  .drop:hover, .drop.over { border-color: #4fc3f7; color: #4fc3f7; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 12px; margin-top: 16px; }
+  .card { background: #1a2230; border-radius: 12px; overflow: hidden; position: relative; }
+  .card img { width: 100%; height: 120px; object-fit: cover; display: block; }
+  .card .meta { padding: 8px 10px; font-size: .75rem; color: #94a3b8; display: flex; justify-content: space-between; align-items: center; }
+  .card button { background: #ef4444; color: white; border: 0; border-radius: 6px; padding: 4px 10px; cursor: pointer; font-size: .75rem; }
+  .msg { margin-top: 12px; color: #4fc3f7; min-height: 1.2em; }
+  a { color: #4fc3f7; }
+</style>
+</head>
+<body>
+  <h1>Kitchen Dashboard — Photos</h1>
+  <p>Upload photos for the wall display background (jpg/png/webp, up to 8MB each).</p>
+  <div class="drop" id="drop">
+    <p><strong>Click to choose photos</strong> or drag &amp; drop here</p>
+    <input type="file" id="file" accept="image/jpeg,image/png,image/webp" multiple hidden />
+  </div>
+  <div class="msg" id="msg"></div>
+  <h2>Current photos</h2>
+  <div class="grid" id="grid"></div>
+  <p style="margin-top:2rem"><a href="/">← Back to dashboard</a></p>
+
+<script>
+const drop = document.getElementById('drop');
+const fileInput = document.getElementById('file');
+const msg = document.getElementById('msg');
+const grid = document.getElementById('grid');
+
+drop.addEventListener('click', () => fileInput.click());
+drop.addEventListener('dragover', (e) => { e.preventDefault(); drop.classList.add('over'); });
+drop.addEventListener('dragleave', () => drop.classList.remove('over'));
+drop.addEventListener('drop', (e) => {
+  e.preventDefault(); drop.classList.remove('over');
+  uploadFiles(e.dataTransfer.files);
+});
+fileInput.addEventListener('change', () => uploadFiles(fileInput.files));
+
+async function uploadFiles(files) {
+  for (const f of files) {
+    if (!/^image\/(jpeg|png|webp)$/.test(f.type)) { msg.textContent = `Skipped ${f.name} (not jpg/png/webp)`; continue; }
+    if (f.size > 8 * 1024 * 1024) { msg.textContent = `Skipped ${f.name} (over 8MB)`; continue; }
+    msg.textContent = `Uploading ${f.name}...`;
+    const res = await fetch(`/api/photos?filename=${encodeURIComponent(f.name)}`, {
+      method: 'POST',
+      headers: { 'Content-Type': f.type },
+      body: f
+    });
+    msg.textContent = res.ok ? `Uploaded ${f.name}` : `Failed: ${f.name} (${res.status})`;
+  }
+  fileInput.value = '';
+  loadGrid();
+}
+
+async function loadGrid() {
+  const res = await fetch('/api/photos');
+  const { photos } = await res.json();
+  grid.innerHTML = '';
+  for (const p of photos) {
+    const card = document.createElement('div');
+    card.className = 'card';
+    card.innerHTML = `<img src="${p.url}" alt="" loading="lazy" />
+      <div class="meta"><span>${(p.size / 1048576).toFixed(1)}MB</span><button data-id="${p.id}">Delete</button></div>`;
+    card.querySelector('button').addEventListener('click', async () => {
+      await fetch(`/api/photos/${p.id}`, { method: 'DELETE' });
+      loadGrid();
+    });
+    grid.appendChild(card);
+  }
+  if (photos.length === 0) grid.innerHTML = '<p style="color:#64748b">No photos yet.</p>';
+}
+loadGrid();
+</script>
+</body>
+</html>
