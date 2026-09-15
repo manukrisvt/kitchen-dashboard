@@ -1,5 +1,6 @@
 // Minimal service worker: network-first for /api (always fresh), cache-first for the app shell.
-const CACHE = 'kitchen-dashboard-v1';
+// The cache name is versioned with a build timestamp by the sw-version plugin in vite.config.js
+const CACHE = `kitchen-dashboard-${BUILD_VERSION}`;
 const APP_SHELL = ['/', '/index.html', '/manifest.json'];
 
 self.addEventListener('install', (event) => {
