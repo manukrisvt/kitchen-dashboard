@@ -80,8 +80,8 @@ app.get('/api/weather', async (req, res) => {
     const data = await getWeather();
     res.json(data);
   } catch (err) {
-    console.error('weather error:', err.message);
-    res.status(502).json({ error: 'Failed to fetch weather' });
+    console.error('weather error:', err);
+    res.status(502).json({ error: 'Failed to fetch weather', detail: err.message });
   }
 });
 
