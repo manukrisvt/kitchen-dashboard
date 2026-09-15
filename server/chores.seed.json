@@ -1,0 +1,10 @@
+[
+  { "name": "Take out trash", "interval_days": 3, "category": "kitchen" },
+  { "name": "Run dishwasher", "interval_days": 1, "category": "kitchen" },
+  { "name": "Change dish sponge", "interval_days": 14, "category": "kitchen" },
+  { "name": "Water plants", "interval_days": 4, "category": "home" },
+  { "name": "Swap towels", "interval_days": 7, "category": "laundry" },
+  { "name": "Clean coffee maker", "interval_days": 30, "category": "kitchen" },
+  { "name": "Replace water filter", "interval_days": 90, "category": "kitchen" },
+  { "name": "Check fridge for expired food", "interval_days": 7, "category": "kitchen" }
+]
