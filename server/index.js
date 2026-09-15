@@ -3,7 +3,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { getEvents } from './events.js';
 import { getWeather } from './weather.js';
-import db from './chores.js';
+import choresDb from './chores.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const app = express();
@@ -24,52 +24,43 @@ function withDue(chore) {
   return { ...chore, days_until_due: daysUntilDue(chore) };
 }
 
-app.get('/api/chores', (req, res) => {
-  const rows = db.prepare('SELECT * FROM chores').all().map(withDue);
+app.get('/api/chores', async (req, res) => {
+  const rows = (await choresDb.all()).map(withDue);
   rows.sort((a, b) => a.days_until_due - b.days_until_due); // most urgent first
   res.json({ chores: rows });
 });
 
-app.post('/api/chores/:id/complete', (req, res) => {
+app.post('/api/chores/:id/complete', async (req, res) => {
   const now = new Date().toISOString();
-  const result = db
-    .prepare('UPDATE chores SET last_completed = ? WHERE id = ?')
-    .run(now, req.params.id);
-  if (result.changes === 0) return res.status(404).json({ error: 'Chore not found' });
-  const chore = db.prepare('SELECT * FROM chores WHERE id = ?').get(req.params.id);
+  const chore = await choresDb.complete(req.params.id, now);
+  if (!chore) return res.status(404).json({ error: 'Chore not found' });
   res.json(withDue(chore));
 });
 
-app.post('/api/chores', (req, res) => {
+app.post('/api/chores', async (req, res) => {
   const { name, interval_days, category } = req.body;
   if (!name || !Number.isFinite(interval_days) || interval_days <= 0) {
     return res.status(400).json({ error: 'name and positive interval_days required' });
   }
   // New chore counts as just completed → countdown starts now
-  const last_completed = new Date().toISOString();
-  const info = db
-    .prepare('INSERT INTO chores (name, interval_days, last_completed, category) VALUES (?, ?, ?, ?)')
-    .run(name, Math.round(interval_days), last_completed, category || '');
-  const chore = db.prepare('SELECT * FROM chores WHERE id = ?').get(info.lastInsertRowid);
+  const chore = await choresDb.insert(name, Math.round(interval_days), new Date().toISOString(), category || '');
   res.status(201).json(withDue(chore));
 });
 
-app.put('/api/chores/:id', (req, res) => {
-  const existing = db.prepare('SELECT * FROM chores WHERE id = ?').get(req.params.id);
+app.put('/api/chores/:id', async (req, res) => {
+  const existing = await choresDb.get(req.params.id);
   if (!existing) return res.status(404).json({ error: 'Chore not found' });
   const { name = existing.name, interval_days = existing.interval_days, category = existing.category } = req.body;
   if (!name || !Number.isFinite(interval_days) || interval_days <= 0) {
     return res.status(400).json({ error: 'name and positive interval_days required' });
   }
-  db.prepare('UPDATE chores SET name = ?, interval_days = ?, category = ? WHERE id = ?')
-    .run(name, Math.round(interval_days), category || '', req.params.id);
-  const chore = db.prepare('SELECT * FROM chores WHERE id = ?').get(req.params.id);
+  const chore = await choresDb.update(req.params.id, name, Math.round(interval_days), category || '');
   res.json(withDue(chore));
 });
 
-app.delete('/api/chores/:id', (req, res) => {
-  const result = db.prepare('DELETE FROM chores WHERE id = ?').run(req.params.id);
-  if (result.changes === 0) return res.status(404).json({ error: 'Chore not found' });
+app.delete('/api/chores/:id', async (req, res) => {
+  const ok = await choresDb.remove(req.params.id);
+  if (!ok) return res.status(404).json({ error: 'Chore not found' });
   res.json({ ok: true });
 });
 

@@ -12,7 +12,8 @@
   "dependencies": {
     "better-sqlite3": "^13.0.3",
     "express": "^4.19.2",
-    "node-ical": "^0.18.0"
+    "node-ical": "^0.18.0",
+    "pg": "^8.23.0"
   },
   "devDependencies": {
     "@vitejs/plugin-react": "^4.3.1",
