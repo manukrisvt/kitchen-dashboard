@@ -162,6 +162,8 @@ function TopStrip({ now, weather, weatherError }) {
         )}
         {weather && (
           <span className="text-2xl text-slate-400 leading-tight">
+            {weather.location}
+            <br />
             {w.label}
             <br />
             H {weather.today.high}° · L {weather.today.low}°

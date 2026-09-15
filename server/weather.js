@@ -17,6 +17,7 @@ export async function getWeather() {
 
   const daily = json.daily;
   const data = {
+    location: 'Indian Trail, NC',
     current: {
       temp: Math.round(json.current.temperature_2m),
       code: json.current.weather_code
