@@ -364,14 +364,23 @@ function PhotoBackground({ photo }) {
   return (
     <div className="absolute inset-0 overflow-hidden" aria-hidden="true">
       {photo && (
-        <img
-          src={photo}
-          alt=""
-          className="absolute inset-0 w-full h-full object-cover transition-opacity duration-[3000ms] opacity-100"
-        />
+        <>
+          {/* Blurred, zoomed copy fills the screen behind the real photo */}
+          <img
+            src={photo}
+            alt=""
+            className="absolute inset-0 w-full h-full object-cover blur-2xl scale-110 opacity-60"
+          />
+          {/* The actual photo, whole — never cropped, centered */}
+          <img
+            src={photo}
+            alt=""
+            className="absolute inset-0 w-full h-full object-contain transition-opacity duration-[3000ms]"
+          />
+        </>
       )}
       {/* Dark overlay keeps all text readable over any photo */}
-      <div className="absolute inset-0 bg-ink-950/80" />
+      <div className="absolute inset-0 bg-ink-950/75" />
       <div className="absolute inset-0 bg-gradient-to-b from-ink-950/60 via-transparent to-ink-950/60" />
     </div>
   );
