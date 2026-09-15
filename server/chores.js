@@ -12,7 +12,7 @@ let db; // better-sqlite3 instance (local only)
 let pg;  // pg Pool (production)
 
 if (USE_PG) {
-  const { default: Pool } = await import('pg');
+  const { Pool } = await import('pg');
   pg = new Pool({
     connectionString: process.env.DATABASE_URL,
     ssl: process.env.DATABASE_URL.includes('localhost') ? undefined : { rejectUnauthorized: false },
