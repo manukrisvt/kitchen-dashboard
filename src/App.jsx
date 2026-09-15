@@ -130,7 +130,7 @@ function StaleDot({ show }) {
 function UpdatedStamp({ updatedAt, error, label }) {
   if (!updatedAt) return null;
   return (
-    <span className="text-slate-500 text-lg flex items-center gap-2">
+    <span className="text-slate-500 text-[clamp(0.7rem,1vw,0.95rem)] flex items-center gap-2 shrink-0">
       <StaleDot show={error} />
       {label} {fmtTime(updatedAt)}
     </span>
@@ -141,28 +141,28 @@ function UpdatedStamp({ updatedAt, error, label }) {
 function TopStrip({ now, weather, weatherError }) {
   const w = weather ? weatherIcon(weather.current.code) : null;
   return (
-    <header className="flex items-end justify-between px-10 pt-6 pb-4 shrink-0">
-      <div className="flex items-baseline gap-8">
-        <span className="text-[7rem] leading-none font-semibold tracking-tight tabular-nums">
+    <header className="flex items-end justify-between px-[2.5vw] pt-[1.5vh] pb-[1vh] shrink-0 gap-4">
+      <div className="flex items-baseline gap-[1.5vw] min-w-0">
+        <span className="text-[clamp(3rem,7vw,7rem)] leading-none font-semibold tracking-tight tabular-nums">
           {now.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' })}
         </span>
-        <span className="text-3xl text-slate-400 font-medium">
+        <span className="text-[clamp(1.2rem,2.2vw,2rem)] text-slate-400 font-medium truncate">
           {now.toLocaleDateString([], { weekday: 'long', month: 'long', day: 'numeric' })}
         </span>
       </div>
-      <div className="flex items-center gap-4">
+      <div className="flex items-center gap-[1vw] shrink-0">
         {weather && (
-          <span className="text-6xl leading-none" role="img" aria-label={w.label}>
+          <span className="text-[clamp(2.2rem,4.5vw,4rem)] leading-none" role="img" aria-label={w.label}>
             {w.icon}
           </span>
         )}
         {weather && (
-          <span className="text-6xl font-semibold tabular-nums leading-none">
+          <span className="text-[clamp(2.2rem,4.5vw,4rem)] font-semibold tabular-nums leading-none">
             {weather.current.temp}°
           </span>
         )}
         {weather && (
-          <span className="text-2xl text-slate-400 leading-tight">
+          <span className="text-[clamp(0.9rem,1.4vw,1.4rem)] text-slate-400 leading-tight">
             {weather.location}
             <br />
             {w.label}
@@ -186,31 +186,31 @@ function TodayColumn({ events, eventsError, updatedAt, now }) {
   const timed = todays.filter((e) => !e.allDay);
 
   return (
-    <section className="w-[60%] h-full flex flex-col px-10 pb-8">
-      <div className="flex items-center justify-between mb-4 shrink-0">
-        <h2 className="text-4xl font-bold text-accent tracking-wide">TODAY</h2>
+    <section className="w-[58%] min-w-0 h-full flex flex-col px-[2.5vw] pb-[2vh]">
+      <div className="flex items-center justify-between mb-[1vh] shrink-0">
+        <h2 className="text-[clamp(1.5rem,2.6vw,2.5rem)] font-bold text-accent tracking-wide">TODAY</h2>
         <UpdatedStamp updatedAt={updatedAt} error={eventsError} label="Updated" />
       </div>
-      <div className="flex-1 overflow-hidden flex flex-col gap-4">
+      <div className="flex-1 overflow-hidden flex flex-col gap-[1.2vh]">
         {allDay.map((e, i) => (
-          <div key={`ad-${i}`} className="bg-ink-800 rounded-2xl px-8 py-4 border-l-8 border-accent-warm">
-            <p className="text-4xl font-semibold">{e.title}</p>
-            {e.location && <p className="text-2xl text-slate-400">{e.location}</p>}
+          <div key={`ad-${i}`} className="bg-ink-800 rounded-2xl px-[1.5vw] py-[1vh] border-l-8 border-accent-warm shrink-0">
+            <p className="text-[clamp(1.3rem,2.4vw,2.2rem)] font-semibold truncate">{e.title}</p>
+            {e.location && <p className="text-[clamp(0.9rem,1.5vw,1.4rem)] text-slate-400 truncate">{e.location}</p>}
           </div>
         ))}
         {timed.length + allDay.length === 0 && (
           <div className="flex-1 flex items-center justify-center">
-            <p className="text-5xl text-slate-500 font-medium">Nothing today 🎉</p>
+            <p className="text-[clamp(1.8rem,3.5vw,3rem)] text-slate-500 font-medium">Nothing today 🎉</p>
           </div>
         )}
         {timed.map((e, i) => (
-          <div key={`t-${i}`} className="bg-ink-800 rounded-2xl px-8 py-5 flex items-center gap-8">
-            <span className="text-4xl font-semibold text-accent tabular-nums w-56 shrink-0">
+          <div key={`t-${i}`} className="bg-ink-800 rounded-2xl px-[1.5vw] py-[1.2vh] flex items-center gap-[1.5vw] shrink-0">
+            <span className="text-[clamp(1.3rem,2.4vw,2.2rem)] font-semibold text-accent tabular-nums w-[9vw] shrink-0">
               {fmtEventTime(e.start)}
             </span>
             <div className="min-w-0">
-              <p className="text-4xl font-semibold truncate">{e.title}</p>
-              {e.location && <p className="text-2xl text-slate-400 truncate">{e.location}</p>}
+              <p className="text-[clamp(1.3rem,2.4vw,2.2rem)] font-semibold truncate">{e.title}</p>
+              {e.location && <p className="text-[clamp(0.9rem,1.5vw,1.4rem)] text-slate-400 truncate">{e.location}</p>}
             </div>
           </div>
         ))}
@@ -225,16 +225,16 @@ function ChoresPanel({ chores, onDone, now }) {
   if (visible.length === 0) return null; // no clutter when nothing is due
 
   return (
-    <div className="shrink-0 mt-6 pt-4 border-t border-ink-700">
-      <h3 className="text-2xl font-bold text-accent-warm tracking-wide mb-3">CHORES</h3>
-      <div className="flex flex-col gap-2">
+    <div className="shrink-0 mt-[1vh] pt-[1vh] border-t border-ink-700">
+      <h3 className="text-[clamp(1rem,1.6vw,1.5rem)] font-bold text-accent-warm tracking-wide mb-[0.5vh]">CHORES</h3>
+      <div className="flex flex-col gap-[0.5vh]">
         {visible.map((c) => {
           const overdue = c.days_until_due < 0;
           return (
-            <div key={c.id} className="flex items-center gap-4">
-              <span className="text-2xl flex-1 min-w-0 truncate">{c.name}</span>
+            <div key={c.id} className="flex items-center gap-[1vw] min-w-0">
+              <span className="text-[clamp(0.9rem,1.5vw,1.4rem)] flex-1 min-w-0 truncate">{c.name}</span>
               <span
-                className={`text-xl tabular-nums shrink-0 ${overdue ? 'text-red-400 font-bold' : 'text-slate-400'}`}
+                className={`text-[clamp(0.75rem,1.1vw,1rem)] tabular-nums shrink-0 ${overdue ? 'text-red-400 font-bold' : 'text-slate-400'}`}
               >
                 {overdue
                   ? `${Math.abs(c.days_until_due)} day${Math.abs(c.days_until_due) === 1 ? '' : 's'} OVERDUE`
@@ -244,7 +244,7 @@ function ChoresPanel({ chores, onDone, now }) {
               </span>
               <button
                 onClick={() => onDone(c.id)}
-                className="shrink-0 bg-accent text-ink-950 font-bold text-xl rounded-xl px-6 py-3 active:scale-95 transition-transform"
+                className="shrink-0 bg-accent text-ink-950 font-bold text-[clamp(0.85rem,1.2vw,1.1rem)] rounded-xl px-[1.2vw] py-[0.8vh] active:scale-95 transition-transform"
                 aria-label={`Mark ${c.name} done`}
               >
                 Done
@@ -263,24 +263,24 @@ function Next7Column({ events, weather, weatherError, weatherUpdatedAt, chores, 
   const dayKeys = Array.from({ length: 8 }, (_, i) => addDays(todayKey, i)).slice(1); // next 7 days
 
   return (
-    <section className="w-[40%] h-full flex flex-col px-10 pb-8 border-l border-ink-700">
-      <h2 className="text-3xl font-bold text-slate-300 tracking-wide mb-4 shrink-0">NEXT 7 DAYS</h2>
-      <div className="flex-1 overflow-hidden flex flex-col gap-3">
+    <section className="w-[42%] min-w-0 h-full flex flex-col px-[2.5vw] pb-[2vh] border-l border-ink-700">
+      <h2 className="text-[clamp(1.2rem,2vw,1.9rem)] font-bold text-slate-300 tracking-wide mb-[1vh] shrink-0">NEXT 7 DAYS</h2>
+      <div className="flex-1 min-h-0 overflow-hidden flex flex-col gap-[1vh]">
         {dayKeys.map((key) => {
           const evs = events?.days?.[key] || [];
           return (
-            <div key={key} className="flex gap-6 items-start">
-              <span className="text-2xl font-semibold text-slate-400 w-32 shrink-0">
+            <div key={key} className="flex gap-[1vw] items-start min-w-0">
+              <span className="text-[clamp(0.9rem,1.5vw,1.4rem)] font-semibold text-slate-400 w-[8vw] shrink-0">
                 {dayName(key, todayKey)}
               </span>
               <div className="min-w-0 flex-1">
                 {evs.length === 0 ? (
-                  <p className="text-2xl text-slate-600">—</p>
+                  <p className="text-[clamp(0.9rem,1.5vw,1.4rem)] text-slate-600">—</p>
                 ) : (
                   evs.slice(0, 3).map((e, i) => (
-                    <p key={i} className="text-2xl truncate">
+                    <p key={i} className="text-[clamp(0.9rem,1.5vw,1.4rem)] truncate">
                       {!e.allDay && (
-                        <span className="text-accent tabular-nums mr-3">{fmtEventTime(e.start)}</span>
+                        <span className="text-accent tabular-nums mr-2">{fmtEventTime(e.start)}</span>
                       )}
                       {e.title}
                     </p>
@@ -292,13 +292,13 @@ function Next7Column({ events, weather, weatherError, weatherUpdatedAt, chores, 
         })}
       </div>
       {weather && (
-        <div className="shrink-0 mt-6 pt-4 border-t border-ink-700 flex items-center justify-between">
+        <div className="shrink-0 mt-[1vh] pt-[1vh] border-t border-ink-700 flex items-center justify-between">
           {weather.next3.map((d) => {
             const dt = new Date(d.date + 'T12:00:00');
             return (
               <div key={d.date} className="text-center">
-                <p className="text-xl text-slate-400">{dt.toLocaleDateString([], { weekday: 'short' })}</p>
-                <p className="text-2xl font-semibold tabular-nums">
+                <p className="text-[clamp(0.8rem,1.2vw,1.1rem)] text-slate-400">{dt.toLocaleDateString([], { weekday: 'short' })}</p>
+                <p className="text-[clamp(0.9rem,1.5vw,1.4rem)] font-semibold tabular-nums">
                   {d.high}° <span className="text-slate-500">{d.low}°</span>
                 </p>
               </div>
