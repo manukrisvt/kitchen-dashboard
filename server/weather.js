@@ -11,9 +11,24 @@ export async function getWeather() {
     return cache.data;
   }
 
-  const res = await fetch(URL);
-  if (!res.ok) throw new Error(`Open-Meteo returned ${res.status}`);
-  const json = await res.json();
+  // Open-Meteo rate-limits (429) shared datacenter IPs; identify ourselves and retry with backoff
+  let json = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    const res = await fetch(URL, {
+      headers: {
+        'User-Agent': 'kitchen-dashboard/1.0 (personal household display)',
+        Accept: 'application/json'
+      }
+    });
+    if (res.ok) {
+      json = await res.json();
+      break;
+    }
+    if (res.status !== 429) throw new Error(`Open-Meteo returned ${res.status}`);
+    // 429: wait and retry (1s, 3s)
+    await new Promise((r) => setTimeout(r, 1000 * (attempt + 1) * (attempt + 1)));
+  }
+  if (!json) throw new Error('Open-Meteo rate limited (429) after retries');
 
   const daily = json.daily;
   const data = {
